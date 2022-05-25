@@ -86,8 +86,6 @@ public:
 		return queueSize;
 	}
 	
-	template<class Condition>
-	friend Queue<T> filter(Queue<T>& queueToFilter, Condition c);
 	class EmptyQueue{};
 
 private:
@@ -101,6 +99,8 @@ private:
 	Node* head;
 	Node* rear;
 	Node* current;
+	T arr[];
+	
 };
 
 template<class T>
@@ -122,10 +122,10 @@ public:
 
 	Iterator& operator++()
 	{
-		if (this->queue->end() == *this)
+		/*if (this->queue->end() == *this)
 		{
 			throw InvalidOperation();
-		}
+		}*/
 
 		++index;
 		return *this;
@@ -170,4 +170,28 @@ private:
 
 
 
+
 #endif //EX3_Queue_H
+
+template<class T, class Condition>
+Queue<T> filter(Queue<T>& queueToFilter, Condition c)
+{
+	Queue<T> tempQueue = new Queue<T>;
+	for (int i = 0; i < queueToFilter.size(); i++)
+	{
+		tempQueue.pushBack(queueToFilter.front());
+	}
+	tempQueue = queueToFilter;
+	Queue<T> filteredQueue;
+	for (int i = 0; i < tempQueue.size(); i++)
+	{
+		if (c(tempQueue.front()))
+		{
+			filteredQueue.pushBack(tempQueue.front());
+		}
+		tempQueue.popFront();
+	}
+
+	delete tempQueue;
+	return filteredQueue;
+}
