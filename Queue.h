@@ -1,106 +1,39 @@
 #ifndef EX3_Queue_H
 #define EX3_Queue_H
 
-#include <iostream>
-
+#define DEFAULT_SIZE 2
 
 template<class T>
 class Queue
 {
 public:
+	Queue();
+	Queue(const Queue&);
+	~Queue();
+	
+	void pushBack(T value);
+	T& front();
+	void popFront();
+	int size() const;
+
 	class Iterator;
 	Iterator begin() const
 	{
 		return Iterator(this, 0);
 	}
-
+	
 	Iterator end() const
 	{
 		return Iterator(this, size());
 	}
 
-	Queue()
-	{
-		this->head = new Node();
-		this->head->next = nullptr;
-		this->rear = nullptr;
-		this->current = this->head;
-	}
-
-	~Queue()
-	{
-		delete this->head;
-		delete this->rear;
-	}
-
-	void pushBack(T object)
-	{
-		Node* newNode = new Node();
-
-		newNode->data = object;
-		newNode->next = nullptr;
-
-		if (this->rear == nullptr)
-		{
-			this->head->next = newNode;
-			this->rear = newNode;
-		}
-		else
-		{
-			this->rear->next = newNode;
-			this->rear = this->rear->next;
-			this->rear->next = nullptr;
-		}
-	}
-
-	void popFront()
-	{
-		if (this->head->next != nullptr)
-		{
-			Node* toDelete = this->head->next;
-			this->head->next = this->head->next->next;
-			delete toDelete;
-		}
-	}
-
-	T& front()
-	{
-		if (this->size() == 0)
-		{
-			throw EmptyQueue();
-		}
-		return this->head->next->data;
-	}
-	
-	int size() const
-	{
-		int queueSize = 0;
-		Node* current = head->next;
-
-		while (current != nullptr)
-		{
-			current = current->next;
-			queueSize++;
-		}
-
-		return queueSize;
-	}
-	
-	class EmptyQueue{};
-
 private:
-
-	struct Node
-	{
-		T data;
-		Node* next;
-	};
-
-	Node* head;
-	Node* rear;
-	Node* current;
-	T arr[];
-	
+	T* arr;
+	int frontIndex;
+	int rearIndex; //also represents the size of the array
+	int maxQueueSize;
+	T value;
+	void expand();
 };
 
 template<class T>
@@ -108,16 +41,7 @@ class Queue<T>::Iterator {
 public:
 	const T& operator*() const
 	{
-		Node* current = queue->head->next;
-		
-		for (int i = 0; current->next != nullptr; i++)
-		{
-			if (index == i)
-			{
-				return current->data;
-			}
-			current = current->next;
-		}
+		return this->queue->arr[this->index];
 	}
 
 	Iterator& operator++()
@@ -167,23 +91,101 @@ private:
 
 };
 
+template<class T>
+int Queue<T>::size() const
+{
+	int queueSize = rearIndex + 1;
+	return queueSize;
+}
 
+template<class T>
+Queue<T>::Queue()
+{
+	this->arr = new T[DEFAULT_SIZE];
+	this->frontIndex = 0;
+	this->rearIndex = -1;
+	this->maxQueueSize = DEFAULT_SIZE;
+}
 
+template<class T>
+Queue<T>::Queue<T>(const Queue<T>& queue) : arr(new T[queue.maxQueueSize])
+{
+	this->frontIndex = queue.frontIndex;
+	this->rearIndex = queue.rearIndex;
+	this->maxQueueSize = queue.maxQueueSize;
 
+	for (int i = 0; i < (this->rearIndex + 1); i++)
+	{
+		this->arr[i] = queue.arr[i];
+	}
+}
 
-#endif //EX3_Queue_H
+template<class T>
+Queue<T>::~Queue()
+{
+	delete[] this->arr;
+}
+
+template<class T>
+void Queue<T>::expand()
+{
+	T newSize = (rearIndex + 1) + DEFAULT_SIZE;
+	T* newData = new T[newSize];
+
+	for (int i = 0; i < this->rearIndex + 1; ++i) {
+		newData[i] = arr[i];
+	}
+
+	delete[] arr;
+	arr = newData;
+	maxQueueSize = newSize;
+}
+
+template<class T>
+void Queue<T>::pushBack(T value)
+{
+	this->rearIndex++;
+	if (this->rearIndex >= this->maxQueueSize)
+	{
+		expand();
+	}
+	this->arr[this->rearIndex] = value;
+}
+
+template<class T>
+T& Queue<T>::front()
+{
+	return this->arr[0];
+}
+
+template<class T>
+void Queue<T>::popFront()
+{
+	int queueSize = rearIndex + 1;
+	if (queueSize <= 0)
+	{
+		throw;
+	}
+
+	T* newData = new T[queueSize];
+
+	for (int i = 1 ; i < queueSize; ++i) {
+		newData[i - 1] = arr[i];
+	}
+
+	delete[] arr;
+	this->rearIndex--;
+	arr = newData;
+	
+}
 
 template<class T, class Condition>
 Queue<T> filter(Queue<T>& queueToFilter, Condition c)
 {
-	Queue<T> tempQueue = new Queue<T>;
-	for (int i = 0; i < queueToFilter.size(); i++)
-	{
-		tempQueue.pushBack(queueToFilter.front());
-	}
-	tempQueue = queueToFilter;
+	Queue<T> tempQueue = queueToFilter;
 	Queue<T> filteredQueue;
-	for (int i = 0; i < tempQueue.size(); i++)
+
+	for (int i = 0; i < queueToFilter.size(); i++)
 	{
 		if (c(tempQueue.front()))
 		{
@@ -191,7 +193,9 @@ Queue<T> filter(Queue<T>& queueToFilter, Condition c)
 		}
 		tempQueue.popFront();
 	}
-
-	delete tempQueue;
+	
 	return filteredQueue;
 }
+
+#endif //EX3_Queue_H
+
