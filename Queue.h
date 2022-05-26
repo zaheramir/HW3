@@ -51,48 +51,16 @@ private:
 template<class T>
 class Queue<T>::Iterator {
 public:
-	const T& operator*() const
-	{
-		return this->queue->arr[this->index];
-	}
-
-	Iterator& operator++()
-	{
-		/*if (this->queue->end() == *this)
-		{
-			throw InvalidOperation();
-		}*/
-
-		++index;
-		return *this;
-	}
-
-	Iterator operator++(int)
-	{
-		Iterator result = *this;
-		++*this;
-		return result;
-	}
-
-	bool operator==(const Iterator& it) const
-	{
-		if (queue == it.queue)
-		{
-			return index == it.index;
-		}
-
-		return false;
-	}
-	class InvalidOperation{};
-
-	bool operator!=(const Iterator& it) const
-	{
-		bool ans = !(*this == it);
-		return ans;
-	}
-
 	Iterator(const Iterator&) = default;
 	Iterator& operator=(const Iterator&) = default;
+
+	const T& operator*() const;
+	Iterator& operator++();
+	Iterator operator++(int);
+	bool operator==(const Iterator & it) const;
+	bool operator!=(const Iterator & it) const;
+
+	class InvalidOperation {};
 
 private:
 	const Queue<T>* queue;
@@ -106,49 +74,16 @@ private:
 template<class T>
 class Queue<T>::ConstIterator {
 public:
-	const T& operator*() const
-	{
-		return this->queue->arr[this->index];
-	}
-
-	ConstIterator& operator++()
-	{
-		/*if (this->queue->end() == *this)
-		{
-			throw InvalidOperation();
-		}*/
-
-		++index;
-		return *this;
-	}
-
-	ConstIterator operator++(int)
-	{
-		ConstIterator result = *this;
-		++* this;
-		return result;
-	}
-
-	bool operator==(const ConstIterator& it) const
-	{
-		if (queue == it.queue)
-		{
-			return index == it.index;
-		}
-
-		return false;
-	}
-	class InvalidOperation {};
-
-	bool operator!=(const ConstIterator& it) const
-	{
-		bool ans = !(*this == it);
-		return ans;
-	}
-
 	ConstIterator(const ConstIterator&) = default;
 	ConstIterator& operator=(const ConstIterator&) = default;
 
+	const T& operator*() const;
+	ConstIterator& operator++();
+	ConstIterator operator++(int);
+	bool operator==(const ConstIterator& it) const;
+	bool operator!=(const ConstIterator& it) const;
+
+	class InvalidOperation {};
 private:
 	const Queue<T>* queue;
 	int index;
@@ -302,7 +237,8 @@ const T& Queue<T>::Iterator::operator*() const
 	return this->queue->arr[this->index];
 }
 
-Iterator& operator++()
+template<class T>
+Queue<T>::Iterator& Queue<T>::Iterator::operator++()
 {
 	/*if (this->queue->end() == *this)
 	{
@@ -313,14 +249,16 @@ Iterator& operator++()
 	return *this;
 }
 
-Iterator operator++(int)
+template<class T>
+Queue<T>::Iterator Queue<T>::Iterator::operator++(int)
 {
 	Iterator result = *this;
 	++* this;
 	return result;
 }
 
-bool operator==(const Iterator& it) const
+template<class T>
+bool Queue<T>::Iterator::operator==(const Iterator& it) const
 {
 	if (queue == it.queue)
 	{
@@ -329,9 +267,9 @@ bool operator==(const Iterator& it) const
 
 	return false;
 }
-class InvalidOperation {};
 
-bool operator!=(const Iterator& it) const
+template<class T>
+bool Queue<T>::Iterator::operator!=(const Iterator& it) const
 {
 	bool ans = !(*this == it);
 	return ans;
