@@ -1,7 +1,7 @@
 #ifndef EX3_Queue_H
 #define EX3_Queue_H
 
-#define DEFAULT_SIZE 2
+#define DEFAULT_SIZE 50
 
 template<class T>
 class Queue
@@ -9,24 +9,36 @@ class Queue
 public:
 	Queue();
 	Queue(const Queue&);
+	Queue& operator=(const Queue&);
 	~Queue();
 	
 	void pushBack(T value);
-	T& front();
+	T& front() const;
 	void popFront();
 	int size() const;
 
 	class Iterator;
-	Iterator begin() const
+	class ConstIterator;
+	
+	Iterator begin() 
 	{
 		return Iterator(this, 0);
 	}
 	
-	Iterator end() const
+	Iterator end() 
 	{
 		return Iterator(this, size());
 	}
 
+	ConstIterator begin() const
+	{
+		return ConstIterator(this, 0);
+	}
+
+	ConstIterator end() const
+	{
+		return ConstIterator(this, size());
+	}
 private:
 	T* arr;
 	int frontIndex;
@@ -92,6 +104,61 @@ private:
 };
 
 template<class T>
+class Queue<T>::ConstIterator {
+public:
+	const T& operator*() const
+	{
+		return this->queue->arr[this->index];
+	}
+
+	ConstIterator& operator++()
+	{
+		/*if (this->queue->end() == *this)
+		{
+			throw InvalidOperation();
+		}*/
+
+		++index;
+		return *this;
+	}
+
+	ConstIterator operator++(int)
+	{
+		ConstIterator result = *this;
+		++* this;
+		return result;
+	}
+
+	bool operator==(const ConstIterator& it) const
+	{
+		if (queue == it.queue)
+		{
+			return index == it.index;
+		}
+
+		return false;
+	}
+	class InvalidOperation {};
+
+	bool operator!=(const ConstIterator& it) const
+	{
+		bool ans = !(*this == it);
+		return ans;
+	}
+
+	ConstIterator(const ConstIterator&) = default;
+	ConstIterator& operator=(const ConstIterator&) = default;
+
+private:
+	const Queue<T>* queue;
+	int index;
+	ConstIterator(const Queue<T>* queue, int index) : queue(queue), index(index)
+	{}
+	friend class Queue<T>;
+
+};
+
+template<class T>
 int Queue<T>::size() const
 {
 	int queueSize = rearIndex + 1;
@@ -117,6 +184,25 @@ Queue<T>::Queue<T>(const Queue<T>& queue) : arr(new T[queue.maxQueueSize])
 	for (int i = 0; i < (this->rearIndex + 1); i++)
 	{
 		this->arr[i] = queue.arr[i];
+	}
+}
+
+template<class T>
+Queue<T>& Queue<T>::operator=(const Queue<T>& queue)
+{
+	if (this == &queue)
+	{
+		return *this;
+	}
+
+	delete[] this->arr;
+	arr = new int[queue.maxQueueSize];
+	maxQueueSize = queue.maxQueueSize;
+	rearIndex = queue.rearIndex;
+
+	for (int i = 0; i <= rearIndex; i++)
+	{
+		arr[i] = queue.arr[i];
 	}
 }
 
@@ -153,7 +239,7 @@ void Queue<T>::pushBack(T value)
 }
 
 template<class T>
-T& Queue<T>::front()
+T& Queue<T>::front() const
 {
 	return this->arr[0];
 }
@@ -195,6 +281,60 @@ Queue<T> filter(Queue<T>& queueToFilter, Condition c)
 	}
 	
 	return filteredQueue;
+}
+
+template<class T, class Alter>
+void transform(Queue<T>& queueToTransform, Alter a)
+{
+	Queue<T> transformedQueue;
+	for (int i = 0; i < queueToTransform.size(); i++)
+	{
+		a(queueToTransform.front());
+		transformedQueue.pushBack(queueToTransform.front());
+		queueToTransform.popFront();
+	}
+	queueToTransform = transformedQueue;
+}
+
+template<class T>
+const T& Queue<T>::Iterator::operator*() const
+{
+	return this->queue->arr[this->index];
+}
+
+Iterator& operator++()
+{
+	/*if (this->queue->end() == *this)
+	{
+		throw InvalidOperation();
+	}*/
+
+	++index;
+	return *this;
+}
+
+Iterator operator++(int)
+{
+	Iterator result = *this;
+	++* this;
+	return result;
+}
+
+bool operator==(const Iterator& it) const
+{
+	if (queue == it.queue)
+	{
+		return index == it.index;
+	}
+
+	return false;
+}
+class InvalidOperation {};
+
+bool operator!=(const Iterator& it) const
+{
+	bool ans = !(*this == it);
+	return ans;
 }
 
 #endif //EX3_Queue_H
