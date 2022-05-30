@@ -22,16 +22,14 @@ public:
 	bool operator!=(const HealthPoints& hp1);
 	friend bool operator<(const HealthPoints& hp1, const HealthPoints& hp2);
 	bool operator<=(const HealthPoints& hp1);
-	bool operator>(const HealthPoints& hp1);
+	bool operator>(const HealthPoints& hp1) const;
 	bool operator>=(const HealthPoints& hp1);
 	friend HealthPoints operator+(const int hp1, const HealthPoints& hp2);
 	friend HealthPoints operator+(const HealthPoints& hp1, const int hp2);
 	friend std::ostream& operator<<(std::ostream& os, const HealthPoints& hp);
 
 
-
 	class InvalidArgument {};
-
 
 private:
 	int m_health;
@@ -39,4 +37,4 @@ private:
 };
 
 
-#endif //EX2_HealthPoints_H
+#endif //EX3_HealthPoints_H

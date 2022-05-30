@@ -1,7 +1,7 @@
 #ifndef EX3_Queue_H
 #define EX3_Queue_H
 
-#define DEFAULT_SIZE 50
+#define DEFAULT_SIZE 5
 
 template<class T>
 class Queue
@@ -51,12 +51,11 @@ private:
 template<class T>
 class Queue<T>::Iterator {
 public:
-	const T& operator*() const;
+	T& operator*();
 	Iterator& operator++();
 	Iterator operator++(int);
-	bool operator==(const Iterator& it) const;
-	bool operator!=(const Iterator& it) const;
-	int hey();
+	bool operator==(const Iterator& it);
+	bool operator!=(const Iterator& it);
 	class InvalidOperation {};
 	Iterator(const Iterator&) = default;
 	Iterator& operator=(const Iterator&) = default;
@@ -92,6 +91,10 @@ private:
 
 };
 
+
+
+#endif //EX3_Queue_H
+
 template<class T>
 int Queue<T>::size() const
 {
@@ -108,7 +111,7 @@ Queue<T>::Queue()
 }
 
 template<class T>
-Queue<T>::Queue<T>(const Queue<T>& queue) : m_arr(new T[queue.m_maxQueueSize])
+Queue<T>::Queue(const Queue<T>& queue) : m_arr(new T[queue.m_maxQueueSize])
 {
 	this->m_rearIndex = queue.m_rearIndex;
 	this->m_maxQueueSize = queue.m_maxQueueSize;
@@ -128,7 +131,7 @@ Queue<T>& Queue<T>::operator=(const Queue<T>& queue)
 	}
 
 	delete[] this->m_arr;
-	this->m_arr = new int[queue.m_maxQueueSize];
+	this->m_arr = new T[queue.m_maxQueueSize];
 	this->m_maxQueueSize = queue.m_maxQueueSize;
 	this->m_rearIndex = queue.m_rearIndex;
 
@@ -136,6 +139,8 @@ Queue<T>& Queue<T>::operator=(const Queue<T>& queue)
 	{
 		this->m_arr[i] = queue.m_arr[i];
 	}
+
+	return *this;
 }
 
 template<class T>
@@ -155,7 +160,14 @@ void Queue<T>::expand()
 	}
 
 	delete[] this->m_arr;
-	this->m_arr = newData;
+	
+	this->m_arr = new T[newSize];
+
+	for (int i = 0; i < newSize; i++)
+	{
+		this->m_arr[i] = newData[i];
+	}
+	delete[] newData;
 	this->m_maxQueueSize = newSize;
 }
 
@@ -185,7 +197,7 @@ template<class T>
 void Queue<T>::popFront()
 {
 	int queueSize = this->m_rearIndex + 1;
-	
+
 	if (queueSize <= 0)
 	{
 		throw EmptyQueue();
@@ -197,13 +209,13 @@ void Queue<T>::popFront()
 		newData[i - 1] = this->m_arr[i];
 	}
 
-	delete[] this->m_arr;
 	this->m_rearIndex--;
 	this->m_arr = newData;
+	delete[] newData;
 }
 
 template<class T, class Condition>
-Queue<T> filter(Queue<T>& queueToFilter, Condition c)
+Queue<T> filter(const Queue<T>& queueToFilter, Condition c)
 {
 	Queue<T> tempQueue = queueToFilter;
 	Queue<T> filteredQueue;
@@ -234,7 +246,7 @@ void transform(Queue<T>& queueToTransform, Alter a)
 }
 
 template<class T>
-const T& Queue<T>::Iterator::operator*() const
+T& Queue<T>::Iterator::operator*() 
 {
 	return this->queue->m_arr[this->index];
 }
@@ -242,7 +254,7 @@ const T& Queue<T>::Iterator::operator*() const
 template<class T>
 typename Queue<T>::Iterator& Queue<T>::Iterator::operator++()
 {
-	if (this->queue->end() == *this)
+	if (queue->end() == *this)
 	{
 		throw InvalidOperation();
 	}
@@ -252,11 +264,11 @@ typename Queue<T>::Iterator& Queue<T>::Iterator::operator++()
 }
 
 template<class T>
-bool Queue<T>::Iterator::operator==(const Iterator& it) const
+bool Queue<T>::Iterator::operator==(const Iterator& it)
 {
-	if (queue == it.queue)
+	if (this->queue == it.queue)
 	{
-		return index == it.index;
+		return this->index == it.index;
 	}
 
 	return false;
@@ -272,7 +284,7 @@ typename Queue<T>::Iterator Queue<T>::Iterator::operator++(int)
 
 
 template<class T>
-bool Queue<T>::Iterator::operator!=(const Iterator& it) const
+bool Queue<T>::Iterator::operator!=(const Iterator& it) 
 {
 	bool ans = !(*this == it);
 	return ans;
@@ -323,8 +335,4 @@ bool Queue<T>::ConstIterator::operator!=(const ConstIterator& it) const
 	bool ans = !(*this == it);
 	return ans;
 }
-
-
-
-#endif //EX3_Queue_H
 

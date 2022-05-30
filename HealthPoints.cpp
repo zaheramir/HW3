@@ -119,7 +119,7 @@ bool HealthPoints::operator<=(const HealthPoints& hp1)
 	return(*this < hp1 || *this == hp1);
 }
 
-bool HealthPoints::operator>(const HealthPoints& hp1)
+bool HealthPoints::operator>(const HealthPoints& hp1) const
 {
 	return(!(*this < hp1));
 }
